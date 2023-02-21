@@ -31,4 +31,12 @@ public class BookRepositoryTest {
         boolean exists = bookRepository.existsByIsbn(isbn);
         assertThat(exists).isTrue();
     }
+
+    @Test
+    @DisplayName("Should return true on save failure")
+    public void returnFalseIfIsbnExistTest() {
+        String isbn = "123";
+        boolean exists = bookRepository.existsByIsbn(isbn);
+        assertThat(exists).isFalse();
+    }
 }
