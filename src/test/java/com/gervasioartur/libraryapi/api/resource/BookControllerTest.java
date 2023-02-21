@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,16 +35,17 @@ public class BookControllerTest {
     BookService bookService;
 
     static String BOOK_API = "/api/books";
+
     @Test
     @DisplayName("Should create a book")
-    public void  createBookTest() throws  Exception{
-        BookDTO bookDTO =  BookDTO.builder().author("Artur").title("As aventuras").isbn("001").build();
-        Book saveBook =  Book.builder().id(10l).author("Artur").title("As aventuras").isbn("001").build();
+    public void createBookTest() throws Exception {
+        BookDTO bookDTO = BookDTO.builder().author("Artur").title("As aventuras").isbn("001").build();
+        Book saveBook = Book.builder().id(10l).author("Artur").title("As aventuras").isbn("001").build();
 
         BDDMockito.given(bookService.save(Mockito.any(Book.class))).willReturn(saveBook);
         String json = new ObjectMapper().writeValueAsString(bookDTO);
 
-        MockHttpServletRequestBuilder request =  MockMvcRequestBuilders
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
                 .post(BOOK_API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -56,6 +58,24 @@ public class BookControllerTest {
                 .andExpect(jsonPath("title").value(bookDTO.getTitle()))
                 .andExpect(jsonPath("author").value(bookDTO.getAuthor()))
                 .andExpect(jsonPath("isbn").value(bookDTO.getIsbn()));
+
+    }
+
+    @Test
+    @DisplayName("Should throw validation error if any field is empty")
+    public void createIvalidBookTest() throws Exception {
+        String json = new ObjectMapper().writeValueAsString(new BookDTO());
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .post(BOOK_API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json);
+
+        mvc
+                .perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors", hasSize(3)));
 
     }
 }
