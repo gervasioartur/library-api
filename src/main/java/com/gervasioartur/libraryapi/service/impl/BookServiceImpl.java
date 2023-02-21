@@ -1,5 +1,6 @@
 package com.gervasioartur.libraryapi.service.impl;
 
+import com.gervasioartur.libraryapi.exception.BusinessException;
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.repository.BookRepository;
 import com.gervasioartur.libraryapi.service.BookService;
@@ -17,6 +18,8 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book save(Book book) {
+        if(bookRepository.existsByIsbn(book.getIsbn()))
+            throw new BusinessException("isbn already used");
         return bookRepository.save(book);
     }
 
