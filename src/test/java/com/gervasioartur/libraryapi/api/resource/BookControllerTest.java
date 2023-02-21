@@ -1,5 +1,6 @@
 package com.gervasioartur.libraryapi.api.resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gervasioartur.libraryapi.api.dto.BookDTO;
 import com.gervasioartur.libraryapi.exception.BusinessException;
@@ -36,22 +37,26 @@ public class BookControllerTest {
     BookService bookService;
 
     static String BOOK_API = "/api/books";
+    private BookDTO createNewBook() {
+        return BookDTO.builder().author("Artur").title("As aventuras").isbn("001").build();
+    }
 
-    @Test
-    @DisplayName("Should create a book")
-    public void createBookTest() throws Exception {
-        BookDTO bookDTO = BookDTO.builder().author("Artur").title("As aventuras").isbn("001").build();
-        Book saveBook = Book.builder().id(10l).author("Artur").title("As aventuras").isbn("001").build();
-
-        BDDMockito.given(bookService.save(Mockito.any(Book.class))).willReturn(saveBook);
+    private MockHttpServletRequestBuilder createRequestBuilder (BookDTO bookDTO) throws JsonProcessingException {
         String json = new ObjectMapper().writeValueAsString(bookDTO);
-
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+        return MockMvcRequestBuilders
                 .post(BOOK_API)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(json);
+    }
 
+    @Test
+    @DisplayName("Should create a book")
+    public void createBookTest() throws Exception {
+        BookDTO bookDTO =  this.createNewBook();
+        Book saveBook = Book.builder().id(10l).author("Artur").title("As aventuras").isbn("001").build();
+        BDDMockito.given(bookService.save(Mockito.any(Book.class))).willReturn(saveBook);
+        MockHttpServletRequestBuilder request = this.createRequestBuilder(bookDTO);
         mvc
                 .perform(request)
                 .andExpect(status().isCreated())
@@ -65,14 +70,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("Should throw validation error if any field is empty")
     public void createIvalidBookTest() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(new BookDTO());
-
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-                .post(BOOK_API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(json);
-
+        MockHttpServletRequestBuilder request = this.createRequestBuilder(new BookDTO());
         mvc
                 .perform(request)
                 .andExpect(status().isBadRequest())
@@ -84,17 +82,10 @@ public class BookControllerTest {
     @DisplayName("Should throw an error if the book isbn is already used")
     public void creatBookWithDuplicatedIsbnTest() throws Exception {
         String errorMessage = "isbn already used";
-        BookDTO bookDTO = BookDTO.builder().author("Artur").title("As aventuras").isbn("001").build();
-        String json = new ObjectMapper().writeValueAsString(bookDTO);
+        BookDTO bookDTO =  this.createNewBook();
         BDDMockito.given(bookService.save(Mockito.any(Book.class)))
                 .willThrow(new BusinessException(errorMessage));
-
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-                .post(BOOK_API)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(json);
-
+        MockHttpServletRequestBuilder request = this.createRequestBuilder(bookDTO);
         mvc
                 .perform(request)
                 .andExpect(status().isBadRequest())
