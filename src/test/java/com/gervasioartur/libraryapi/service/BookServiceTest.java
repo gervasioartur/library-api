@@ -29,12 +29,16 @@ public class BookServiceTest {
         this.bookService = new BookServiceImpl(bookRepository);
     }
 
+    private Book bookFactory ( ){
+        Book book = Book.builder().author("Gerry").title("gerry").isbn("123").build();
+        Mockito.when(bookRepository.save(book)).thenReturn(Book.builder().id(1l).author("Gerry").title("gerry").isbn("123").build());
+        return book;
+    }
     @Test
     @DisplayName("Should save a book")
     public void saveBookTest() {
         Mockito.when(bookRepository.existsByIsbn(Mockito.anyString())).thenReturn(false);
-        Book book = Book.builder().author("Gerry").title("gerry").isbn("123").build();
-        Mockito.when(bookRepository.save(book)).thenReturn(Book.builder().id(1l).author("Gerry").title("gerry").isbn("123").build());
+        Book book = this.bookFactory();
         Book savedBook = bookService.save(book);
         assertThat(savedBook.getId()).isNotNull();
         assertThat(savedBook.getAuthor()).isEqualTo("Gerry");
@@ -46,8 +50,7 @@ public class BookServiceTest {
     @DisplayName("Should throw a BusinessException if the book isbn is already used")
     public void shouldNotSaveBookWithDuplicateIsbnTest() {
         Mockito.when(bookRepository.existsByIsbn(Mockito.anyString())).thenReturn(true);
-        Book book = Book.builder().author("Gerry").title("gerry").isbn("123").build();
-        Mockito.when(bookRepository.save(book)).thenReturn(Book.builder().id(1l).author("Gerry").title("gerry").isbn("123").build());
+        Book book = this.bookFactory();
         Throwable exception = catchThrowable(() -> bookService.save(book));
         assertThat(exception)
                 .isInstanceOf(BusinessException.class)
