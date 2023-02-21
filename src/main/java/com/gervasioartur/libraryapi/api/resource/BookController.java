@@ -2,6 +2,7 @@ package com.gervasioartur.libraryapi.api.resource;
 
 import com.gervasioartur.libraryapi.api.dto.BookDTO;
 import com.gervasioartur.libraryapi.api.exception.ApiErros;
+import com.gervasioartur.libraryapi.exception.BusinessException;
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.service.BookService;
 import org.modelmapper.ModelMapper;
@@ -36,7 +37,12 @@ public class BookController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public  ApiErros handleValidationException(MethodArgumentNotValidException exception){
         BindingResult bindingResult = exception.getBindingResult();
-        List<ObjectError> allErrors = bindingResult.getAllErrors();
         return  new ApiErros(bindingResult);
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public  ApiErros handleBusinessException(BusinessException exception){
+        return  new ApiErros(exception);
     }
 }
