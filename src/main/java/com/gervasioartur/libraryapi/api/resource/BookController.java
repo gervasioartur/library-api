@@ -5,6 +5,7 @@ import com.gervasioartur.libraryapi.api.exception.ApiErros;
 import com.gervasioartur.libraryapi.exception.BusinessException;
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.service.BookService;
+import lombok.Getter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,12 @@ public class BookController {
         Book book = modelMapper.map(bookDTO, Book.class);
         book = bookService.save(book);
         return modelMapper.map(book, BookDTO.class);
+    }
+
+    @GetMapping("{id}")
+    public BookDTO getOne(@PathVariable Long id) {
+       Book book = bookService.getById(id).get();
+       return modelMapper.map(book, BookDTO.class);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
