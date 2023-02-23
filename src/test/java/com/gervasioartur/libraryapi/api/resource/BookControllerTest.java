@@ -142,4 +142,17 @@ public class BookControllerTest {
                 .andExpect(status().isNoContent());
     }
 
+    @Test
+    @DisplayName("Should return resource not found if the book does not exist")
+    public void removeInexistentBookTest() throws Exception {
+        Long id =  2l;
+        BDDMockito.given(bookService.getById(Mockito.anyLong())).willReturn(Optional.empty());
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+               .delete(BOOK_API + "/" + id)
+               .accept(MediaType.APPLICATION_JSON);
+        mvc
+               .perform(request)
+               .andExpect(status().isNotFound());
+    }
+
 }
