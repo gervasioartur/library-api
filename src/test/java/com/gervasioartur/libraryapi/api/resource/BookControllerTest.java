@@ -184,7 +184,7 @@ public class BookControllerTest {
 
     @Test
     @DisplayName("Should not update book if book does not exist")
-    public void shouldNotUpdateBookIfBookExists() throws Exception {
+    public void NotupdateBookTest() throws Exception {
         Long id =  1l;
         BookDTO bookDTO = this.createNewBook();
         Book updatingBook = Book.builder().id(id).author("Artur ff").title("As aventuras novo").isbn("031").build();
