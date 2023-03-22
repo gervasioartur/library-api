@@ -55,4 +55,13 @@ public class BookRepositoryTest {
         Optional<Book> foundBook = bookRepository.findById(book.getId());
         assertThat(foundBook.isPresent()).isTrue();
     }
+
+    @Test
+    @DisplayName("Should return false on getById failure")
+    public  void NotFoundBookGetByIdTest() {
+        Book book = this.bookFactory();
+        book.setId(1l);
+        Optional<Book> foundBook = bookRepository.findById(book.getId());
+        assertThat(foundBook.isPresent()).isFalse();
+    }
 }
