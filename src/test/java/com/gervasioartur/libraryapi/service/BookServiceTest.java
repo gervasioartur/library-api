@@ -73,6 +73,16 @@ public class BookServiceTest {
         assertThat(foundBook.get().getIsbn()).isEqualTo(book.getIsbn());
         assertThat(foundBook.get().getAuthor()).isEqualTo(book.getAuthor());
         assertThat(foundBook.get().getTitle()).isEqualTo(book.getTitle());
+    }
 
+    @Test
+    @DisplayName("Should return empty if book is not found")
+    public void bookNotFoundByIdTest() throws Exception {
+        Long id = 1L;
+        Book book = this.bookFactory();
+        book.setId(id);
+        Mockito.when(bookRepository.findById(id)).thenReturn(Optional.empty());
+        Optional<Book> foundBook =  bookService.getById(id);
+        assertThat(foundBook.isPresent()).isFalse();
     }
 }
