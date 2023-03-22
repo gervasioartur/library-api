@@ -66,9 +66,7 @@ public class BookServiceTest {
     public void deleteTest()  {
         Book book = this.bookFactory();
         book.setId(1l);
-        Mockito.when(bookRepository.existsByIsbn(book.getIsbn())).thenReturn(true);
         this.bookService.delete(book);
         Mockito.verify(bookRepository, Mockito.atLeastOnce()).delete(book);
     }
-
 }
