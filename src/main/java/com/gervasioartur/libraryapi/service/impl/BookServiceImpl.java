@@ -31,8 +31,6 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public void delete(Book book) {
-        if (bookRepository.existsByIsbn(book.getIsbn()))
-            this.bookRepository.delete(book);
+        this.bookRepository.delete(book);
     }
-
 }
