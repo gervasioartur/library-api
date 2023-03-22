@@ -43,7 +43,7 @@ public class BookControllerTest {
         return BookDTO.builder().author("Artur").title("As aventuras").isbn("001").build();
     }
 
-    private MockHttpServletRequestBuilder createRequestBuilder (BookDTO bookDTO) throws JsonProcessingException {
+    private MockHttpServletRequestBuilder createPostRequestBuilder (BookDTO bookDTO) throws JsonProcessingException {
         String json = new ObjectMapper().writeValueAsString(bookDTO);
         return MockMvcRequestBuilders
                 .post(BOOK_API)
@@ -56,9 +56,9 @@ public class BookControllerTest {
     @DisplayName("Should create a book")
     public void createBookTest() throws Exception {
         BookDTO bookDTO =  this.createNewBook();
-        Book saveBook = Book.builder().id(10l).author("Artur").title("As aventuras").isbn("001").build();
+        Book saveBook = Book.builder().id(1l).author("Artur").title("As aventuras").isbn("001").build();
         BDDMockito.given(bookService.save(Mockito.any(Book.class))).willReturn(saveBook);
-        MockHttpServletRequestBuilder request = this.createRequestBuilder(bookDTO);
+        MockHttpServletRequestBuilder request = this.createPostRequestBuilder(bookDTO);
         mvc
                 .perform(request)
                 .andExpect(status().isCreated())
@@ -72,7 +72,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("Should throw validation error if any field is empty")
     public void createIvalidBookTest() throws Exception {
-        MockHttpServletRequestBuilder request = this.createRequestBuilder(new BookDTO());
+        MockHttpServletRequestBuilder request = this.createPostRequestBuilder(new BookDTO());
         mvc
                 .perform(request)
                 .andExpect(status().isBadRequest())
@@ -87,7 +87,7 @@ public class BookControllerTest {
         BookDTO bookDTO =  this.createNewBook();
         BDDMockito.given(bookService.save(Mockito.any(Book.class)))
                 .willThrow(new BusinessException(errorMessage));
-        MockHttpServletRequestBuilder request = this.createRequestBuilder(bookDTO);
+        MockHttpServletRequestBuilder request = this.createPostRequestBuilder(bookDTO);
         mvc
                 .perform(request)
                 .andExpect(status().isBadRequest())
@@ -153,6 +153,33 @@ public class BookControllerTest {
         mvc
                .perform(request)
                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should update a book")
+    public void updateBookTest() throws Exception {
+      Long id =  1l;
+        BookDTO bookDTO = this.createNewBook();
+        Book updatingBook = Book.builder().id(id).author("Artur ff").title("As aventuras novo").isbn("031").build();
+        BDDMockito.given(bookService.getById(id)).willReturn(Optional.of(updatingBook));
+        Book updatedBook =  Book.builder().id(1l).author("Artur").title("As aventuras").isbn("001").build();
+        BDDMockito.given(bookService.update(updatingBook)).willReturn(updatedBook);
+
+
+        String json = new ObjectMapper().writeValueAsString(bookDTO);
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put(BOOK_API + "/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json);
+
+                mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("title").value(createNewBook().getTitle()))
+                .andExpect(jsonPath("author").value(updatedBook.getAuthor()))
+                .andExpect(jsonPath("isbn").value("031"));
     }
 
 }
