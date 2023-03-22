@@ -11,6 +11,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
@@ -22,6 +24,11 @@ public class BookRepositoryTest {
 
     @Autowired
     BookRepository bookRepository;
+
+    private Book bookFactory ( ){
+        Book book = Book.builder().author("Gerry").title("gerry").isbn("123").build();
+        return book;
+    }
 
     @Test
     @DisplayName("Should return true on save success")
@@ -38,5 +45,15 @@ public class BookRepositoryTest {
         String isbn = "123";
         boolean exists = bookRepository.existsByIsbn(isbn);
         assertThat(exists).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should remove a Book if exists")
+    public void removeBookTest() {
+        Book book = this.bookFactory();
+        entityManager.persist(book);
+        bookRepository.delete(book);
+        Optional<Book> result = bookRepository.findById(book.getId());
+        assertThat(result.isPresent()).isNotNull();
     }
 }
