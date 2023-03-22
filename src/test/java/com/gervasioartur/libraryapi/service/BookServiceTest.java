@@ -14,6 +14,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -58,4 +60,15 @@ public class BookServiceTest {
 
         Mockito.verify(bookRepository, Mockito.never()).save(book);
     }
+
+    @Test
+    @DisplayName("Should remove a Book if exists")
+    public void deleteTest()  {
+        Book book = this.bookFactory();
+        book.setId(1l);
+        Mockito.when(bookRepository.existsByIsbn(book.getIsbn())).thenReturn(true);
+        this.bookService.delete(book);
+        Mockito.verify(bookRepository, Mockito.atLeastOnce()).delete(book);
+    }
+
 }
