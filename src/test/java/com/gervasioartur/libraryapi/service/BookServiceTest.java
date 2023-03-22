@@ -14,8 +14,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -57,5 +58,21 @@ public class BookServiceTest {
                 .hasMessage("isbn already used");
 
         Mockito.verify(bookRepository, Mockito.never()).save(book);
+    }
+
+    @Test
+    @DisplayName("Should get a book by id")
+    public void getByIdTest() throws Exception {
+        Long id = 1L;
+        Book book = this.bookFactory();
+        book.setId(id);
+        Mockito.when(bookRepository.findById(id)).thenReturn(Optional.of(book));
+        Optional<Book> foundBook = bookService.getById(id);
+        assertThat(foundBook.isPresent()).isTrue();
+        assertThat(foundBook.get().getId()).isEqualTo(id);
+        assertThat(foundBook.get().getIsbn()).isEqualTo(book.getIsbn());
+        assertThat(foundBook.get().getAuthor()).isEqualTo(book.getAuthor());
+        assertThat(foundBook.get().getTitle()).isEqualTo(book.getTitle());
+
     }
 }
