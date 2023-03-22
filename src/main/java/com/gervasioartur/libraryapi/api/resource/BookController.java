@@ -54,10 +54,19 @@ public class BookController {
         BindingResult bindingResult = exception.getBindingResult();
         return new ApiErros(bindingResult);
     }
+    @PutMapping("{id}")
+    public BookDTO update (@PathVariable Long id, @RequestBody @Valid BookDTO bookDto) {
+        Book book = bookService.getById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        book.setTitle(bookDto.getTitle());
+        book.setAuthor(bookDto.getAuthor());
+        bookService.update(book);
+        return  modelMapper.map(book, BookDTO.class);
+    }
 
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErros handleBusinessException(BusinessException exception) {
         return new ApiErros(exception);
     }
+
 }
