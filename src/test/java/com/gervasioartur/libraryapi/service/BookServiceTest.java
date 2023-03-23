@@ -69,4 +69,25 @@ public class BookServiceTest {
         this.bookService.delete(book);
         Mockito.verify(bookRepository, Mockito.atLeastOnce()).delete(book);
     }
+
+    @Test
+    @DisplayName("Should update a book")
+    public void updateBookTest(){
+        long id = 1l;
+        Book updatingBook = Book.builder().id(id).build();
+
+        Book updatedBook = this.bookFactory();
+        updatedBook.setId(id);
+        Mockito.when(bookRepository.save(updatingBook)).thenReturn(updatedBook);
+
+        Book book = bookService.update(updatingBook);
+
+        assertThat(book.getId()).isEqualTo(updatedBook.getId());
+        assertThat(book.getTitle()).isEqualTo(updatedBook.getTitle());
+        assertThat(book.getIsbn()).isEqualTo(updatedBook.getIsbn());
+        assertThat(book.getAuthor()).isEqualTo(updatedBook.getAuthor());
+    }
+
+
+
 }
