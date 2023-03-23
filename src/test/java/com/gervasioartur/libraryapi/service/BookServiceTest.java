@@ -5,6 +5,7 @@ import com.gervasioartur.libraryapi.exception.BusinessException;
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.repository.BookRepository;
 import com.gervasioartur.libraryapi.service.impl.BookServiceImpl;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,5 +69,31 @@ public class BookServiceTest {
         book.setId(1l);
         this.bookService.delete(book);
         Mockito.verify(bookRepository, Mockito.atLeastOnce()).delete(book);
+    }
+
+    @Test
+    @DisplayName("Should update a book")
+    public void updateBookTest(){
+        long id = 1l;
+        Book updatingBook = Book.builder().id(id).build();
+
+        Book updatedBook = this.bookFactory();
+        updatedBook.setId(id);
+        Mockito.when(bookRepository.save(updatingBook)).thenReturn(updatedBook);
+
+        Book book = bookService.update(updatingBook);
+
+        assertThat(book.getId()).isEqualTo(updatedBook.getId());
+        assertThat(book.getTitle()).isEqualTo(updatedBook.getTitle());
+        assertThat(book.getIsbn()).isEqualTo(updatedBook.getIsbn());
+        assertThat(book.getAuthor()).isEqualTo(updatedBook.getAuthor());
+    }
+
+    @Test
+    @DisplayName("Should return an error if when trying to update invalid book")
+    public void updateInvalidBookTest(){
+        Book book = new Book();
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bookService.update(book));
+        Mockito.verify( bookRepository, Mockito.never() ).save(book);
     }
 }

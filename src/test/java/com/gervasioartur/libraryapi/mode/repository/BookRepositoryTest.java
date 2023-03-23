@@ -56,4 +56,22 @@ public class BookRepositoryTest {
         Optional<Book> result = bookRepository.findById(book.getId());
         assertThat(result.isPresent()).isNotNull();
     }
+
+    @Test
+    @DisplayName("Should get a book by id")
+    public void findByIdTest(){
+        Book book = this.bookFactory();
+        entityManager.persist(book);
+        Optional<Book> foundBook = bookRepository.findById(book.getId());
+        assertThat(foundBook.isPresent()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should save a book")
+    public void saveBookTest(){
+        Book book = this.bookFactory();
+        Book savedBook = bookRepository.save(book);
+        assertThat(savedBook.getId()).isNotNull();
+
+    }
 }
