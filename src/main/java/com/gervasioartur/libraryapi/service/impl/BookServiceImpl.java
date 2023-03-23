@@ -36,6 +36,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book update(Book book) {
-        return null;
+        if(book == null || book.getId() == null){
+            throw new IllegalArgumentException("Book id cant be null.");
+        }
+        return this.bookRepository.save(book);
     }
 }
