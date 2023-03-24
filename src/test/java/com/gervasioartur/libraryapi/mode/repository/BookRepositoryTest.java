@@ -25,7 +25,7 @@ public class BookRepositoryTest {
     @Autowired
     BookRepository bookRepository;
 
-    private Book bookFactory ( ){
+    private Book bookFactory() {
         Book book = Book.builder().author("Gerry").title("gerry").isbn("123").build();
         return book;
     }
@@ -59,7 +59,7 @@ public class BookRepositoryTest {
 
     @Test
     @DisplayName("Should get a book by id")
-    public void findByIdTest(){
+    public void findByIdTest() {
         Book book = this.bookFactory();
         entityManager.persist(book);
         Optional<Book> foundBook = bookRepository.findById(book.getId());
@@ -68,7 +68,7 @@ public class BookRepositoryTest {
 
     @Test
     @DisplayName("Should save a book")
-    public void saveBookTest(){
+    public void saveBookTest() {
         Book book = this.bookFactory();
         Book savedBook = bookRepository.save(book);
         assertThat(savedBook.getId()).isNotNull();

@@ -53,15 +53,15 @@ public class BookController {
     }
 
     @PutMapping("{id}")
-    public BookDTO update( @PathVariable Long id, @RequestBody @Valid BookDTO dto){
-        return bookService.getById(id).map( book -> {
+    public BookDTO update(@PathVariable Long id, @RequestBody @Valid BookDTO dto) {
+        return bookService.getById(id).map(book -> {
 
             book.setAuthor(dto.getAuthor());
             book.setTitle(dto.getTitle());
             book = bookService.update(book);
             return modelMapper.map(book, BookDTO.class);
 
-        }).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -73,13 +73,13 @@ public class BookController {
 
     @GetMapping
     public Page<BookDTO> find(BookDTO bookDTO, Pageable pageRequest) {
-      Book filter =  modelMapper.map(bookDTO, Book.class);
-      Page<Book> result = bookService.find(filter, pageRequest );
-     List<BookDTO> list = result.getContent()
-             .stream()
-             .map(entity -> modelMapper.map(entity, BookDTO.class))
-             .collect(Collectors.toList());
-      return  new PageImpl<BookDTO>(list, pageRequest, result.getTotalElements());
+        Book filter = modelMapper.map(bookDTO, Book.class);
+        Page<Book> result = bookService.find(filter, pageRequest);
+        List<BookDTO> list = result.getContent()
+                .stream()
+                .map(entity -> modelMapper.map(entity, BookDTO.class))
+                .collect(Collectors.toList());
+        return new PageImpl<BookDTO>(list, pageRequest, result.getTotalElements());
     }
 
     @ExceptionHandler(BusinessException.class)
