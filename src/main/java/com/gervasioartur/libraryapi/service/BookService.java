@@ -1,8 +1,9 @@
 package com.gervasioartur.libraryapi.service;
 
 import com.gervasioartur.libraryapi.model.entity.Book;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 
 public interface BookService {
@@ -13,4 +14,6 @@ public interface BookService {
     void delete(Book book);
 
     Book update(Book book);
+
+    Page<Book> find(Book book, Pageable page);
 }
