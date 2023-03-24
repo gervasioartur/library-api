@@ -15,8 +15,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -32,11 +30,12 @@ public class BookServiceTest {
         this.bookService = new BookServiceImpl(bookRepository);
     }
 
-    private Book bookFactory ( ){
+    private Book bookFactory() {
         Book book = Book.builder().author("Gerry").title("gerry").isbn("123").build();
         Mockito.when(bookRepository.save(book)).thenReturn(Book.builder().id(1l).author("Gerry").title("gerry").isbn("123").build());
         return book;
     }
+
     @Test
     @DisplayName("Should save a book")
     public void saveBookTest() {
@@ -64,7 +63,7 @@ public class BookServiceTest {
 
     @Test
     @DisplayName("Should remove a Book if exists")
-    public void deleteTest()  {
+    public void deleteTest() {
         Book book = this.bookFactory();
         book.setId(1l);
         this.bookService.delete(book);
@@ -73,7 +72,7 @@ public class BookServiceTest {
 
     @Test
     @DisplayName("Should update a book")
-    public void updateBookTest(){
+    public void updateBookTest() {
         long id = 1l;
         Book updatingBook = Book.builder().id(id).build();
 
@@ -91,9 +90,9 @@ public class BookServiceTest {
 
     @Test
     @DisplayName("Should return an error if when trying to update invalid book")
-    public void updateInvalidBookTest(){
+    public void updateInvalidBookTest() {
         Book book = new Book();
         Assertions.assertThrows(IllegalArgumentException.class, () -> bookService.update(book));
-        Mockito.verify( bookRepository, Mockito.never() ).save(book);
+        Mockito.verify(bookRepository, Mockito.never()).save(book);
     }
 }
