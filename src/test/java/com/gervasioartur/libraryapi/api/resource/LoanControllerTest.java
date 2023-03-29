@@ -6,6 +6,7 @@ import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.entity.Loan;
 import com.gervasioartur.libraryapi.service.BookService;
 import com.gervasioartur.libraryapi.service.LoanService;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,5 +63,27 @@ public class LoanControllerTest {
                 .perform(request)
                 .andExpect(status().isCreated())
                 .andExpect(content().string("1"));
+    }
+
+    @Test
+    @DisplayName("Should return error when trying to loan an inexistent book")
+    public void invalidCreateLoanTest() throws Exception {
+        LoanDTO dto =  new LoanDTO().builder().isbn("123").customer("Fulano").build();
+        String json =  new ObjectMapper().writeValueAsString(dto);
+
+        Book book = Book.builder().id(1l).isbn("123").build();
+        BDDMockito.given(bookService.getBookByIsbn("123")).willReturn(Optional.empty());
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(LOAN_API)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json);
+
+        mvc
+                .perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors", Matchers.hasSize(1)))
+                .andExpect(jsonPath("errors[0]").value("Book not found for passed isbn!"));
+
     }
 }
