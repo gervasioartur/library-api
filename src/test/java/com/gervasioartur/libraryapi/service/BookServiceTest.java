@@ -26,6 +26,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.InstanceOfAssertFactories.ARRAY;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -41,13 +43,13 @@ public class BookServiceTest {
 
     private Book bookFactory ( ){
         Book book = Book.builder().author("Gerry").title("gerry").isbn("123").build();
-        Mockito.when(bookRepository.save(book)).thenReturn(Book.builder().id(1l).author("Gerry").title("gerry").isbn("123").build());
+        when(bookRepository.save(book)).thenReturn(Book.builder().id(1l).author("Gerry").title("gerry").isbn("123").build());
         return book;
     }
     @Test
     @DisplayName("Should save a book")
     public void saveBookTest() {
-        Mockito.when(bookRepository.existsByIsbn(Mockito.anyString())).thenReturn(false);
+        when(bookRepository.existsByIsbn(Mockito.anyString())).thenReturn(false);
         Book book = this.bookFactory();
         Book savedBook = bookService.save(book);
         assertThat(savedBook.getId()).isNotNull();
@@ -59,14 +61,14 @@ public class BookServiceTest {
     @Test
     @DisplayName("Should throw a BusinessException if the book isbn is already used")
     public void shouldNotSaveBookWithDuplicateIsbnTest() {
-        Mockito.when(bookRepository.existsByIsbn(Mockito.anyString())).thenReturn(true);
+        when(bookRepository.existsByIsbn(Mockito.anyString())).thenReturn(true);
         Book book = this.bookFactory();
         Throwable exception = catchThrowable(() -> bookService.save(book));
         assertThat(exception)
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("isbn already used");
 
-        Mockito.verify(bookRepository, Mockito.never()).save(book);
+        verify(bookRepository, Mockito.never()).save(book);
     }
 
     @Test
@@ -75,7 +77,7 @@ public class BookServiceTest {
         Book book = this.bookFactory();
         book.setId(1l);
         this.bookService.delete(book);
-        Mockito.verify(bookRepository, Mockito.atLeastOnce()).delete(book);
+        verify(bookRepository, Mockito.atLeastOnce()).delete(book);
     }
 
     @Test
@@ -86,7 +88,7 @@ public class BookServiceTest {
 
         Book updatedBook = this.bookFactory();
         updatedBook.setId(id);
-        Mockito.when(bookRepository.save(updatingBook)).thenReturn(updatedBook);
+        when(bookRepository.save(updatingBook)).thenReturn(updatedBook);
 
         Book book = bookService.update(updatingBook);
 
@@ -100,8 +102,8 @@ public class BookServiceTest {
     @DisplayName("Should return an error if when trying to update invalid book")
     public void updateInvalidBookTest(){
         Book book = new Book();
-        Assertions.assertThrows(IllegalArgumentException.class, () -> bookService.update(book));
-        Mockito.verify( bookRepository, Mockito.never() ).save(book);
+        assertThrows(IllegalArgumentException.class, () -> bookService.update(book));
+        verify( bookRepository, Mockito.never() ).save(book);
     }
 
     @Test
@@ -111,7 +113,7 @@ public class BookServiceTest {
         List<Book> list = Arrays.asList(book);
         PageRequest  pageRequest = PageRequest.of(0, 10);
         Page<Book> page = new PageImpl<Book>(list, pageRequest, 1);
-        Mockito.when(bookRepository.findAll(Mockito.any(Example.class), Mockito.any(PageRequest.class))).thenReturn(page);
+        when(bookRepository.findAll(Mockito.any(Example.class), Mockito.any(PageRequest.class))).thenReturn(page);
         bookService.find(book, pageRequest);
 
         Page<Book> result = bookService.find(book, pageRequest);
@@ -119,6 +121,20 @@ public class BookServiceTest {
         assertThat(result.getContent()).isEqualTo(list);
         assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
         assertThat(result.getPageable().getPageSize()).isEqualTo(10);
+    }
 
+    @Test
+    @DisplayName("Should return book by isbn")
+    public void getBookByIsbnTest() throws Exception {
+        String isbn ="123";
+        Book book = this.bookFactory();
+        when(bookRepository.findByIsbn(isbn)).thenReturn(Optional.of(book));
+        Optional<Book> result = bookService.getBookByIsbn(isbn);
+
+        assertThat(result.isPresent()).isTrue();
+        assertThat(result.get().getId()).isEqualTo(book.getId());
+        assertThat(result.get().getIsbn()).isEqualTo(book.getIsbn());
+
+        verify(bookRepository, times(1)).findByIsbn(isbn);
     }
 }

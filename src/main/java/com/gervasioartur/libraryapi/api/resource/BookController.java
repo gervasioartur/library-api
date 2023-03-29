@@ -64,13 +64,6 @@ public class BookController {
         }).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiErros handleValidationException(MethodArgumentNotValidException exception) {
-        BindingResult bindingResult = exception.getBindingResult();
-        return new ApiErros(bindingResult);
-    }
-
     @GetMapping
     public Page<BookDTO> find(BookDTO bookDTO, Pageable pageRequest) {
       Book filter =  modelMapper.map(bookDTO, Book.class);
@@ -80,11 +73,5 @@ public class BookController {
              .map(entity -> modelMapper.map(entity, BookDTO.class))
              .collect(Collectors.toList());
       return  new PageImpl<BookDTO>(list, pageRequest, result.getTotalElements());
-    }
-
-    @ExceptionHandler(BusinessException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiErros handleBusinessException(BusinessException exception) {
-        return new ApiErros(exception);
     }
 }
