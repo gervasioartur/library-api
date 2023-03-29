@@ -25,4 +25,9 @@ public class ApplicationControlAdvice {
         BindingResult bindingResult = exception.getBindingResult();
         return new ApiErros(bindingResult);
     }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity handleResponseStatusException(ResponseStatusException ex) {
+        return new ResponseEntity(new ApiErros(ex), ex.getStatus());
+    }
 }
