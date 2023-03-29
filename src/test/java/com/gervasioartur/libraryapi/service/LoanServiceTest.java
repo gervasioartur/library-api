@@ -1,5 +1,6 @@
 package com.gervasioartur.libraryapi.service;
 
+import com.gervasioartur.libraryapi.exception.BusinessException;
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.entity.Loan;
 import com.gervasioartur.libraryapi.model.repository.LoanRepository;
@@ -15,7 +16,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -51,7 +53,7 @@ public class LoanServiceTest {
                 .customer(customer)
                 .loanDate(LocalDate.now())
                 .build();
-
+        when(loanRepository.existsByBookAndNotReturned(book)).thenReturn(false);
         when(loanRepository.save(savingLoan)).thenReturn(savedLoan);
         Loan loan = loanService.save(savingLoan);
 
@@ -59,5 +61,27 @@ public class LoanServiceTest {
         assertThat(loan.getBook().getId()).isEqualTo(savedLoan.getBook().getId());
         assertThat(loan.getCustomer()).isEqualTo(savedLoan.getCustomer());
         assertThat(loan.getLoanDate()).isEqualTo(savedLoan.getLoanDate());
+    }
+
+    @Test
+    @DisplayName("Should throw an business exception when trying to loan an already loaned book")
+    public void loanedBookSaveTest() throws Exception {
+        Book book = Book.builder().id(1l).build();
+        String customer = "Fulano";
+
+        Loan savingLoan = Loan
+                .builder()
+                .book(book)
+                .customer(customer)
+                .loanDate(LocalDate.now())
+                .build();
+        when(loanRepository.existsByBookAndNotReturned(book)).thenReturn(true);
+
+        Throwable exception = catchThrowable( () -> loanService.save(savingLoan));
+        assertThat(exception)
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("Book already loaned!");
+
+        verify(loanRepository, never()).save(savingLoan);
     }
 }
