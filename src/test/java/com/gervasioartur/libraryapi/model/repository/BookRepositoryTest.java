@@ -1,4 +1,4 @@
-package com.gervasioartur.libraryapi.mode.repository;
+package com.gervasioartur.libraryapi.model.repository;
 
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.repository.BookRepository;
@@ -25,7 +25,7 @@ public class BookRepositoryTest {
     @Autowired
     BookRepository bookRepository;
 
-    private Book bookFactory ( ){
+    public static Book bookFactory ( ){
         Book book = Book.builder().author("Gerry").title("gerry").isbn("123").build();
         return book;
     }
