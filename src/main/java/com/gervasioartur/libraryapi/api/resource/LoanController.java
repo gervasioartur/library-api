@@ -1,6 +1,7 @@
 package com.gervasioartur.libraryapi.api.resource;
 
 import com.gervasioartur.libraryapi.api.dto.LoanDTO;
+import com.gervasioartur.libraryapi.api.dto.ReturnedLoanDTO;
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.entity.Loan;
 import com.gervasioartur.libraryapi.service.BookService;
@@ -36,4 +37,13 @@ public class LoanController {
         loan =  loanService.save(loan);
         return loan.getId();
     }
+
+    @PatchMapping("{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void returnedBook (@PathVariable long id, @RequestBody ReturnedLoanDTO returnedLoanDTO){
+        Loan loan = this.loanService.getById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        loan.setReturned(returnedLoanDTO.getReturned());
+        this.loanService.update(loan);
+    }
+
 }
