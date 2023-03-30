@@ -5,6 +5,8 @@ import com.gervasioartur.libraryapi.model.entity.Loan;
 import com.gervasioartur.libraryapi.model.repository.LoanRepository;
 import com.gervasioartur.libraryapi.service.LoanService;
 
+import java.util.Optional;
+
 public class LoanServiceImpl implements LoanService {
     private LoanRepository loanRepository;
     public LoanServiceImpl(LoanRepository loanRepository) {
@@ -17,5 +19,15 @@ public class LoanServiceImpl implements LoanService {
             throw new BusinessException("Book already loaned!");
 
         return this.loanRepository.save(loan);
+    }
+
+    @Override
+    public Optional<Loan> getById(long id) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Loan update(Loan loan) {
+        return null;
     }
 }

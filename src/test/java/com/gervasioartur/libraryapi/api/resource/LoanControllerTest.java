@@ -2,6 +2,7 @@ package com.gervasioartur.libraryapi.api.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gervasioartur.libraryapi.api.dto.LoanDTO;
+import com.gervasioartur.libraryapi.api.dto.ReturnedLoanDTO;
 import com.gervasioartur.libraryapi.exception.BusinessException;
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.entity.Loan;
@@ -27,6 +28,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -108,5 +112,48 @@ public class LoanControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errors", Matchers.hasSize(1)))
                 .andExpect(jsonPath("errors[0]").value("Book already loaned!"));
+    }
+
+    @Test
+    @DisplayName("Should return a book")
+    public void returnBookTest() throws Exception {
+        Book book = Book.builder().id(1l).build();
+        String customer = "Fulano";
+
+        Loan loan = Loan
+                .builder()
+                .id(1l)
+                .book(book)
+                .customer(customer)
+                .loanDate(LocalDate.now())
+                .build();
+
+        ReturnedLoanDTO returnedLoanDTO = new ReturnedLoanDTO().builder() .returned(true).build();
+        BDDMockito.given(loanService.getById(Mockito.anyLong())).willReturn(Optional.of(loan));
+
+        String json = new ObjectMapper().writeValueAsString(returnedLoanDTO);
+        mvc.perform(
+                patch(LOAN_API.concat("/1"))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+        ).andExpect(status().isOk());
+
+        verify(loanService, times(1)).update(loan);
+    }
+
+    @Test
+    @DisplayName("Should return 404  when trying to return an inexistent book")
+    public void returnInexistentBookTest() throws Exception {
+        ReturnedLoanDTO returnedLoanDTO = new ReturnedLoanDTO().builder() .returned(true).build();
+        BDDMockito.given(loanService.getById(Mockito.anyLong())).willReturn(Optional.empty());
+
+        String json = new ObjectMapper().writeValueAsString(returnedLoanDTO);
+        mvc.perform(
+                patch(LOAN_API.concat("/1"))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+        ).andExpect(status().isNotFound());
     }
 }
