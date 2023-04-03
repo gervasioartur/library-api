@@ -32,7 +32,7 @@ public class LoanServiceTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        this.loanService =  new LoanServiceImpl(this.loanRepository);
+        this.loanService = new LoanServiceImpl(this.loanRepository);
     }
 
     @Test
@@ -79,19 +79,20 @@ public class LoanServiceTest {
                 .build();
         when(loanRepository.existsByBookAndNotReturned(book)).thenReturn(true);
 
-        Throwable exception = catchThrowable( () -> loanService.save(savingLoan));
+        Throwable exception = catchThrowable(() -> loanService.save(savingLoan));
         assertThat(exception)
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("Book already loaned!");
 
         verify(loanRepository, never()).save(savingLoan);
     }
+
     @Test
     @DisplayName("Should get the loan information")
     public void getLoanInfoTest() throws Exception {
         Book book = Book.builder().id(1l).build();
         String customer = "Fulano";
-        Long id =  1l;
+        Long id = 1l;
 
         Loan loan = Loan
                 .builder()
@@ -101,7 +102,7 @@ public class LoanServiceTest {
                 .loanDate(LocalDate.now())
                 .build();
         Mockito.when(loanRepository.findById(id)).thenReturn(Optional.of(loan));
-        Optional<Loan> result =  loanService.getById(id);
+        Optional<Loan> result = loanService.getById(id);
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getId()).isEqualTo(id);
         assertThat(result.get().getCustomer()).isEqualTo(loan.getCustomer());
@@ -113,10 +114,10 @@ public class LoanServiceTest {
 
     @Test
     @DisplayName("Should update a loan")
-    public void updateLoanTest(){
+    public void updateLoanTest() {
         Book book = Book.builder().id(1l).build();
         String customer = "Fulano";
-        Long id =  1l;
+        Long id = 1l;
 
         Loan loan = Loan
                 .builder()
@@ -126,7 +127,7 @@ public class LoanServiceTest {
                 .loanDate(LocalDate.now())
                 .returned(true)
                 .build();
-        when (loanRepository.save(loan)).thenReturn(loan);
+        when(loanRepository.save(loan)).thenReturn(loan);
 
         Loan updatedLoan = loanService.update(loan);
 

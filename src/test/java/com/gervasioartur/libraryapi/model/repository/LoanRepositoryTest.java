@@ -2,7 +2,6 @@ package com.gervasioartur.libraryapi.model.repository;
 
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.entity.Loan;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,14 +21,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 public class LoanRepositoryTest {
     @Autowired
-    private LoanRepository loanRepository;
-
-    @Autowired
     TestEntityManager entityManager;
+    @Autowired
+    private LoanRepository loanRepository;
 
     @Test
     @DisplayName("Should verify if exists a loan that was not returned for a book")
-    public void existsByBookAndNotReturnedTest() throws Exception{
+    public void existsByBookAndNotReturnedTest() throws Exception {
 
         Book book = bookFactory();
         entityManager.persist(book);

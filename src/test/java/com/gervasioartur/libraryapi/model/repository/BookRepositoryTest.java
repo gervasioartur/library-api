@@ -1,7 +1,6 @@
 package com.gervasioartur.libraryapi.model.repository;
 
 import com.gervasioartur.libraryapi.model.entity.Book;
-import com.gervasioartur.libraryapi.model.repository.BookRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +24,7 @@ public class BookRepositoryTest {
     @Autowired
     BookRepository bookRepository;
 
-    public static Book bookFactory ( ){
+    public static Book bookFactory() {
         Book book = Book.builder().author("Gerry").title("gerry").isbn("123").build();
         return book;
     }
@@ -59,7 +58,7 @@ public class BookRepositoryTest {
 
     @Test
     @DisplayName("Should get a book by id")
-    public void findByIdTest(){
+    public void findByIdTest() {
         Book book = this.bookFactory();
         entityManager.persist(book);
         Optional<Book> foundBook = bookRepository.findById(book.getId());
@@ -68,7 +67,7 @@ public class BookRepositoryTest {
 
     @Test
     @DisplayName("Should save a book")
-    public void saveBookTest(){
+    public void saveBookTest() {
         Book book = this.bookFactory();
         Book savedBook = bookRepository.save(book);
         assertThat(savedBook.getId()).isNotNull();

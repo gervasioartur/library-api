@@ -10,4 +10,5 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     @Query(value = " select case when (count(l.id) > 0) then true else false end " +
             "from Loan l where  l.book= :book and l.returned <> true ")
     boolean existsByBookAndNotReturned(@Param("book") Book book);
+
 }
