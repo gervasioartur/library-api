@@ -111,5 +111,26 @@ public class LoanServiceTest {
         verify(loanRepository, times(1)).findById(id);
     }
 
+    @Test
+    @DisplayName("Should update a loan")
+    public void updateLoanTest(){
+        Book book = Book.builder().id(1l).build();
+        String customer = "Fulano";
+        Long id =  1l;
 
+        Loan loan = Loan
+                .builder()
+                .id(id)
+                .book(book)
+                .customer(customer)
+                .loanDate(LocalDate.now())
+                .returned(true)
+                .build();
+        when (loanRepository.save(loan)).thenReturn(loan);
+
+        Loan updatedLoan = loanService.update(loan);
+
+        assertThat(updatedLoan.getReturned()).isTrue();
+        verify(loanRepository).save(loan);
+    }
 }
