@@ -6,6 +6,7 @@ import com.gervasioartur.libraryapi.api.dto.ReturnedLoanDTO;
 import com.gervasioartur.libraryapi.exception.BusinessException;
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.entity.Loan;
+import com.gervasioartur.libraryapi.model.repository.LoanRepository;
 import com.gervasioartur.libraryapi.service.BookService;
 import com.gervasioartur.libraryapi.service.LoanService;
 import org.hamcrest.Matchers;
@@ -28,6 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -46,6 +48,8 @@ public class LoanControllerTest {
 
     @MockBean
     LoanService loanService;
+    @Autowired
+    private LoanRepository loanRepository;
 
     @Test
     @DisplayName("Should loan a book")
