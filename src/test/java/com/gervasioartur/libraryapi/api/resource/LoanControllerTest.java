@@ -6,7 +6,6 @@ import com.gervasioartur.libraryapi.api.dto.ReturnedLoanDTO;
 import com.gervasioartur.libraryapi.exception.BusinessException;
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.entity.Loan;
-import com.gervasioartur.libraryapi.model.repository.LoanRepository;
 import com.gervasioartur.libraryapi.service.BookService;
 import com.gervasioartur.libraryapi.service.LoanService;
 import org.hamcrest.Matchers;
@@ -19,6 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -27,13 +29,14 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 @WebMvcTest(controllers = LoanController.class)
@@ -48,14 +51,12 @@ public class LoanControllerTest {
 
     @MockBean
     LoanService loanService;
-    @Autowired
-    private LoanRepository loanRepository;
 
     @Test
     @DisplayName("Should loan a book")
-    public void createLoanTest( )throws Exception {
-        LoanDTO dto =  new LoanDTO().builder().isbn("123").customer("Fulano").build();
-        String json =  new ObjectMapper().writeValueAsString(dto);
+    public void createLoanTest() throws Exception {
+        LoanDTO dto = new LoanDTO().builder().isbn("123").customer("Fulano").build();
+        String json = new ObjectMapper().writeValueAsString(dto);
 
         Book book = Book.builder().id(1l).isbn("123").build();
         BDDMockito.given(bookService.getBookByIsbn("123")).willReturn(Optional.of(book));
@@ -77,8 +78,8 @@ public class LoanControllerTest {
     @Test
     @DisplayName("Should return error when trying to loan an inexistent book")
     public void invalidCreateLoanTest() throws Exception {
-        LoanDTO dto =  new LoanDTO().builder().isbn("123").customer("Fulano").build();
-        String json =  new ObjectMapper().writeValueAsString(dto);
+        LoanDTO dto = new LoanDTO().builder().isbn("123").customer("Fulano").build();
+        String json = new ObjectMapper().writeValueAsString(dto);
 
         BDDMockito.given(bookService.getBookByIsbn("123")).willReturn(Optional.empty());
 
@@ -97,8 +98,8 @@ public class LoanControllerTest {
     @Test
     @DisplayName("Should return error when trying to loan a already loaned book")
     public void loanBookErrorOnCreateLoanTest() throws Exception {
-        LoanDTO dto =  new LoanDTO().builder().isbn("123").customer("Fulano").build();
-        String json =  new ObjectMapper().writeValueAsString(dto);
+        LoanDTO dto = new LoanDTO().builder().isbn("123").customer("Fulano").build();
+        String json = new ObjectMapper().writeValueAsString(dto);
 
         Book book = Book.builder().id(1l).isbn("123").build();
         BDDMockito.given(bookService.getBookByIsbn("123")).willReturn(Optional.of(book));
@@ -132,7 +133,7 @@ public class LoanControllerTest {
                 .loanDate(LocalDate.now())
                 .build();
 
-        ReturnedLoanDTO returnedLoanDTO = new ReturnedLoanDTO().builder() .returned(true).build();
+        ReturnedLoanDTO returnedLoanDTO = new ReturnedLoanDTO().builder().returned(true).build();
         BDDMockito.given(loanService.getById(Mockito.anyLong())).willReturn(Optional.of(loan));
 
         String json = new ObjectMapper().writeValueAsString(returnedLoanDTO);
@@ -149,7 +150,7 @@ public class LoanControllerTest {
     @Test
     @DisplayName("Should return 404  when trying to return an inexistent book")
     public void returnInexistentBookTest() throws Exception {
-        ReturnedLoanDTO returnedLoanDTO = new ReturnedLoanDTO().builder() .returned(true).build();
+        ReturnedLoanDTO returnedLoanDTO = new ReturnedLoanDTO().builder().returned(true).build();
         BDDMockito.given(loanService.getById(Mockito.anyLong())).willReturn(Optional.empty());
 
         String json = new ObjectMapper().writeValueAsString(returnedLoanDTO);
@@ -159,5 +160,37 @@ public class LoanControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)
         ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should filter loans")
+    public void findLoanTest() throws Exception {
+        Book book = Book.builder().id(1l).build();
+        String customer = "Fulano";
+        Long id = 1l;
+
+        Loan loan = Loan
+                .builder()
+                .id(id)
+                .book(book)
+                .customer(customer)
+                .loanDate(LocalDate.now())
+                .build();
+
+        BDDMockito.given(loanService.find(Mockito.any(Loan.class), Mockito.any(Pageable.class)))
+                .willReturn(new PageImpl<Loan>(Arrays.asList(loan), PageRequest.of(0, 100), 1));
+
+        String queryString = String.format("?isbn=%s&customer=%s&page=0&size=10", book.getIsbn(), loan.getCustomer());
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(LOAN_API.concat(queryString))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", Matchers.hasSize(1)))
+                .andExpect(jsonPath("totalElements").value(1))
+                .andExpect(jsonPath("pageable.pageSize").value(10))
+                .andExpect(jsonPath("pageable.pageNumber").value(0));
     }
 }
