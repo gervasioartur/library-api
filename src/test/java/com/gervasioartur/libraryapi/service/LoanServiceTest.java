@@ -1,5 +1,6 @@
 package com.gervasioartur.libraryapi.service;
 
+import com.gervasioartur.libraryapi.api.dto.LoanFilterDTO;
 import com.gervasioartur.libraryapi.exception.BusinessException;
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.entity.Loan;
@@ -11,10 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -133,5 +139,45 @@ public class LoanServiceTest {
 
         assertThat(updatedLoan.getReturned()).isTrue();
         verify(loanRepository).save(loan);
+    }
+
+    @Test
+    @DisplayName("Deve filtrar empréstimos pelas propriedades")
+    public void findLoanTest() {
+        //cenario
+        LoanFilterDTO loanFilterDTO = LoanFilterDTO.builder().customer("Fulano").isbn("321").build();
+
+        Loan loan = createLoan();
+        loan.setId(1l);
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<Loan> lista = Arrays.asList(loan);
+
+        Page<Loan> page = new PageImpl<>(lista, pageRequest, lista.size());
+        when(loanRepository.findByBookIsbnOrCustomer(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(PageRequest.class))
+        )
+                .thenReturn(page);
+
+        //execucao
+        Page<Loan> result = loanService.find(loanFilterDTO, pageRequest);
+
+        //verificacoes
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent()).isEqualTo(lista);
+        assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
+        assertThat(result.getPageable().getPageSize()).isEqualTo(10);
+    }
+
+    public static Loan createLoan(){
+        Book book = Book.builder().id(1l).build();
+        String customer = "Fulano";
+
+        return Loan.builder()
+                .book(book)
+                .customer(customer)
+                .loanDate(LocalDate.now())
+                .build();
     }
 }

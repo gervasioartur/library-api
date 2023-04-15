@@ -1,5 +1,7 @@
 package com.gervasioartur.libraryapi.service.impl;
 
+import com.gervasioartur.libraryapi.api.dto.LoanDTO;
+import com.gervasioartur.libraryapi.api.dto.LoanFilterDTO;
 import com.gervasioartur.libraryapi.exception.BusinessException;
 import com.gervasioartur.libraryapi.model.entity.Loan;
 import com.gervasioartur.libraryapi.model.repository.LoanRepository;
@@ -37,13 +39,7 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
-    public Page<Loan> find(Loan filter, Pageable pageRequest) {
-        Example<Loan> example = Example.of(filter, ExampleMatcher
-                .matching()
-                .withIgnoreCase()
-                .withIgnoreNullValues()
-                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
-        );
-        return this.loanRepository.findAll(example, pageRequest);
+    public Page<Loan> find(LoanFilterDTO filterDTO, Pageable pageable) {
+        return loanRepository.findByBookIsbnOrCustomer( filterDTO.getIsbn(), filterDTO.getCustomer(), pageable );
     }
 }

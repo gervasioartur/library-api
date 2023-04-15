@@ -1,6 +1,8 @@
 package com.gervasioartur.libraryapi.api.resource;
 
+import com.gervasioartur.libraryapi.api.dto.BookDTO;
 import com.gervasioartur.libraryapi.api.dto.LoanDTO;
+import com.gervasioartur.libraryapi.api.dto.LoanFilterDTO;
 import com.gervasioartur.libraryapi.api.dto.ReturnedLoanDTO;
 import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.entity.Loan;
@@ -57,13 +59,20 @@ public class LoanController {
     }
 
     @GetMapping
-    public Page<LoanDTO> find(LoanDTO loanDTO, Pageable pageRequest) {
-        Loan filter = modelMapper.map(loanDTO, Loan.class);
-        Page<Loan> result = loanService.find(filter, pageRequest);
-        List<LoanDTO> list = result.getContent()
+    public Page<LoanDTO> find(LoanFilterDTO dto, Pageable pageRequest) {
+        Page<Loan> result = loanService.find(dto, pageRequest);
+        List<LoanDTO> loans = result
+                .getContent()
                 .stream()
-                .map(entity -> modelMapper.map(entity, LoanDTO.class))
-                .collect(Collectors.toList());
-        return new PageImpl<LoanDTO>(list, pageRequest, result.getTotalElements());
+                .map(entity -> {
+
+                    Book book = entity.getBook();
+                    BookDTO bookDTO = modelMapper.map(book, BookDTO.class);
+                    LoanDTO loanDTO = modelMapper.map(entity, LoanDTO.class);
+                    loanDTO.setBook(bookDTO);
+                    return loanDTO;
+
+                }).collect(Collectors.toList());
+        return new PageImpl<LoanDTO>(loans, pageRequest, result.getTotalElements());
     }
 }

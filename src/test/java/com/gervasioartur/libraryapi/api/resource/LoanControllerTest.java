@@ -2,6 +2,7 @@ package com.gervasioartur.libraryapi.api.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gervasioartur.libraryapi.api.dto.LoanDTO;
+import com.gervasioartur.libraryapi.api.dto.LoanFilterDTO;
 import com.gervasioartur.libraryapi.api.dto.ReturnedLoanDTO;
 import com.gervasioartur.libraryapi.exception.BusinessException;
 import com.gervasioartur.libraryapi.model.entity.Book;
@@ -177,14 +178,15 @@ public class LoanControllerTest {
                 .loanDate(LocalDate.now())
                 .build();
 
-        BDDMockito.given(loanService.find(Mockito.any(Loan.class), Mockito.any(Pageable.class)))
-                .willReturn(new PageImpl<Loan>(Arrays.asList(loan), PageRequest.of(0, 100), 1));
+        BDDMockito.given( loanService.find( Mockito.any(LoanFilterDTO.class), Mockito.any(Pageable.class)) )
+                .willReturn( new PageImpl<Loan>( Arrays.asList(loan), PageRequest.of(0,10), 1 ) );
 
-        String queryString = String.format("?isbn=%s&customer=%s&page=0&size=10", book.getIsbn(), loan.getCustomer());
+        String queryString = String.format("?isbn=%s&customer=%s&page=0&size=10",
+                book.getIsbn(), loan.getCustomer());
+
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
                 .get(LOAN_API.concat(queryString))
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON);
+                .accept(MediaType.APPLICATION_JSON);
 
         mvc.perform(request)
                 .andExpect(status().isOk())
