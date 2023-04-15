@@ -6,12 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoanDTO {
-    String isbn;
-    String customer;
+@Builder
+public class LoanFilterDTO {
 
-    BookDTO book;
+    private String isbn;
+    private String customer;
+
 }
