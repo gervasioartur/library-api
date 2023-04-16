@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 public class LoanServiceImpl implements LoanService {
-    private LoanRepository loanRepository;
+    private final LoanRepository loanRepository;
 
     public LoanServiceImpl(LoanRepository loanRepository) {
         this.loanRepository = loanRepository;
@@ -43,6 +43,6 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public Page<Loan> getLoanByBook(Book book, Pageable pageable) {
-        return null;
+        return loanRepository.findByBook(book, pageable);
     }
 }
