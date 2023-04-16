@@ -178,8 +178,8 @@ public class LoanControllerTest {
                 .loanDate(LocalDate.now())
                 .build();
 
-        BDDMockito.given( loanService.find( Mockito.any(LoanFilterDTO.class), Mockito.any(Pageable.class)) )
-                .willReturn( new PageImpl<Loan>( Arrays.asList(loan), PageRequest.of(0,10), 1 ) );
+        BDDMockito.given(loanService.find(Mockito.any(LoanFilterDTO.class), Mockito.any(Pageable.class)))
+                .willReturn(new PageImpl<Loan>(Arrays.asList(loan), PageRequest.of(0, 10), 1));
 
         String queryString = String.format("?isbn=%s&customer=%s&page=0&size=10",
                 book.getIsbn(), loan.getCustomer());

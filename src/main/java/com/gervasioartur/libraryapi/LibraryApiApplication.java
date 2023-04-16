@@ -15,5 +15,4 @@ public class LibraryApiApplication {
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
-
 }
