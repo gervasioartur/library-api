@@ -46,9 +46,10 @@ public class LoanRepositoryTest {
         boolean exists = loanRepository.existsByBookAndNotReturned(book);
         assertThat(exists).isTrue();
     }
+
     @Test
     @DisplayName("Deve buscar empréstimo pelo isbn do livro ou customer")
-    public void findByBookIsbnOrCustomerTest(){
+    public void findByBookIsbnOrCustomerTest() {
         Loan loan = createAndPersistLoan(LocalDate.now());
 
         Page<Loan> result = loanRepository.findByBookIsbnOrCustomer(
@@ -60,7 +61,8 @@ public class LoanRepositoryTest {
         assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
         assertThat(result.getTotalElements()).isEqualTo(1);
     }
-    public Loan createAndPersistLoan(LocalDate loanDate){
+
+    public Loan createAndPersistLoan(LocalDate loanDate) {
         Book book = bookFactory();
         entityManager.persist(book);
 

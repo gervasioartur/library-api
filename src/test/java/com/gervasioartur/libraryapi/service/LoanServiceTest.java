@@ -36,6 +36,17 @@ public class LoanServiceTest {
     @MockBean
     private LoanRepository loanRepository;
 
+    public static Loan createLoan() {
+        Book book = Book.builder().id(1l).build();
+        String customer = "Fulano";
+
+        return Loan.builder()
+                .book(book)
+                .customer(customer)
+                .loanDate(LocalDate.now())
+                .build();
+    }
+
     @BeforeEach
     public void setUp() throws Exception {
         this.loanService = new LoanServiceImpl(this.loanRepository);
@@ -168,16 +179,5 @@ public class LoanServiceTest {
         assertThat(result.getContent()).isEqualTo(lista);
         assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
         assertThat(result.getPageable().getPageSize()).isEqualTo(10);
-    }
-
-    public static Loan createLoan(){
-        Book book = Book.builder().id(1l).build();
-        String customer = "Fulano";
-
-        return Loan.builder()
-                .book(book)
-                .customer(customer)
-                .loanDate(LocalDate.now())
-                .build();
     }
 }

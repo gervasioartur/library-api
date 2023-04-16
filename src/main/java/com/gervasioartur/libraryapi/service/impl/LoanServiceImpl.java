@@ -1,13 +1,11 @@
 package com.gervasioartur.libraryapi.service.impl;
 
-import com.gervasioartur.libraryapi.api.dto.LoanDTO;
 import com.gervasioartur.libraryapi.api.dto.LoanFilterDTO;
 import com.gervasioartur.libraryapi.exception.BusinessException;
+import com.gervasioartur.libraryapi.model.entity.Book;
 import com.gervasioartur.libraryapi.model.entity.Loan;
 import com.gervasioartur.libraryapi.model.repository.LoanRepository;
 import com.gervasioartur.libraryapi.service.LoanService;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -40,6 +38,11 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public Page<Loan> find(LoanFilterDTO filterDTO, Pageable pageable) {
-        return loanRepository.findByBookIsbnOrCustomer( filterDTO.getIsbn(), filterDTO.getCustomer(), pageable );
+        return loanRepository.findByBookIsbnOrCustomer(filterDTO.getIsbn(), filterDTO.getCustomer(), pageable);
+    }
+
+    @Override
+    public Page<Loan> getLoanByBook(Book book, Pageable pageable) {
+        return null;
     }
 }

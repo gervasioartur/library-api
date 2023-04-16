@@ -27,9 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LoanController {
     private final LoanService loanService;
-    @Autowired
     private final BookService bookService;
-    @Autowired
     private final ModelMapper modelMapper;
 
     @PostMapping
