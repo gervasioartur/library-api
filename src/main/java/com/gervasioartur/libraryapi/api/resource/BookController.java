@@ -8,7 +8,6 @@ import com.gervasioartur.libraryapi.service.BookService;
 import com.gervasioartur.libraryapi.service.LoanService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -78,16 +77,16 @@ public class BookController {
     @GetMapping("{id}/laons")
     public Page<LoanDTO> loansByBook(@PathVariable Long id, Pageable pageable) {
         Book book = bookService.getById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        Page<Loan>  result =  loanService.getLoanByBook(book, pageable);
+        Page<Loan> result = loanService.getLoanByBook(book, pageable);
         List<LoanDTO> list = result.getContent()
                 .stream()
                 .map(loan -> {
-                    Book loanBook  = loan.getBook();
+                    Book loanBook = loan.getBook();
                     BookDTO bookDTO = modelMapper.map(loanBook, BookDTO.class);
                     LoanDTO loanDTO = modelMapper.map(loan, LoanDTO.class);
                     loanDTO.setBook(bookDTO);
                     return loanDTO;
                 }).collect(Collectors.toList());
-        return  new PageImpl<LoanDTO>(list,pageable,result.getTotalElements());
+        return new PageImpl<LoanDTO>(list, pageable, result.getTotalElements());
     }
 }
